@@ -1,0 +1,15 @@
+---
+title: "Assignment 5A Airline Delays: Approach"
+author: "Antik Salimullah"
+format: html
+editor: visual
+---
+
+## Approach
+
+I will recreate the airline data in R, preserve the missing values, and transform the dataset from wide to long format. I will then compare the percentage of delays or arrivals for two airlines overall and across five cities and explain any differences between the two comparisons.
+
+```         
+# Load packages
+library(tidyverse)
+```
