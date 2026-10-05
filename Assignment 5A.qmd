@@ -1,0 +1,89 @@
+---
+title: "Assignment 5A Code"
+author: "Antik Salimullah"
+format: html
+editor: visual
+---
+
+# Introduction
+
+This assignment looks at arrival delays for Alaska Airlines and AM West across five different cities. I’ll clean and reshape the data in R, then compare their delay rates overall and by city to see how the results difference.
+
+# Load Packages
+
+```{r}
+library(tidyverse)
+```
+
+# Import the Data
+
+```{r}
+library(tidyverse)
+
+airline_data <- read_csv("airline_delays.csv")
+airline_data
+```
+
+# Data Cleaning
+
+The original data contains blank cells in the airline column because each airline name applies to both the on-time and delayed rows. I filled those missing values so every row has the correct airline name.
+
+```{r}
+airline_data <- airline_data |>
+  fill(Airline)
+
+airline_data
+```
+
+# Transform from Wide to Long
+
+The original dataset is in a wide format, with each city stored in a separate column. I reshaped the data into long format so each row represents one airline, flight status, city, and flight count.
+
+```{r}
+airline_long <- airline_data |>
+  pivot_longer(
+    cols = -c(Airline, Status),
+    names_to = "City",
+    values_to = "Flights"
+  )
+airline_long
+```
+
+# Overall Airline Delay Comparison
+
+I calculated the overall delay percentage for each airline by dividing the number of delayed flights by the total number of flights. This gives a better comparison than looking at delayed flight counts alone.
+
+```{r}
+overall_delay <- airline_long |>
+  group_by(Airline) |>
+  summarise(
+    Delayed = sum(Flights[Status == "delayed"]),
+    Total = sum(Flights),
+    Delay_Percent = Delayed / Total * 100
+  )
+overall_delay
+```
+
+# Delay Comparison by City
+
+I also calculated the delay percentage for each airline in each city. This makes it easier to compare their performance at the individual destination level.
+
+```{r}
+city_delay <- airline_long |>
+  group_by(Airline, City) |>
+  summarise(
+    Delayed = sum(Flights[Status == "delayed"]),
+    Total = sum(Flights),
+    Delay_Percent = Delayed / Total * 100,
+    .groups = "drop"
+  )
+city_delay
+```
+
+# Overall vs City-by-City Comparison
+
+The results change depending on whether the airlines are compared overall or by individual city. Alaska had a lower delay percentage in every city, but AM West had the lower overall delay percentage because a much larger share of its flights came from Phoenix, where delays were relatively low. This is an example of Simpson’s Paradox.
+
+# Conclusion
+
+Overall, AM West had the lower delay percentage, but Alaska performed better in every individual city. This shows how looking only at the overall numbers can be misleading when the airlines have very different numbers of flights across each destination.
